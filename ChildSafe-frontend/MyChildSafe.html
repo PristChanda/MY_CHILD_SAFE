@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChildSafe Zambia - Protecting Our Children</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary-blue: #1E88E5;
+            --secondary-green: #4CAF50;
+            --accent-orange: #FF9800;
+            --dark-navy: #0D47A1;
+            --bg-white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --medium-gray: #9E9E9E;
+            --dark-gray: #212121;
+            --high-urgency: #F44336;
+            --medium-urgency: #FF9800;
+            --low-urgency: #4CAF50;
+            --resolved: #9E9E9E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark-gray);
+            line-height: 1.6;
+            background-color: var(--bg-white);
+            overflow-x: auto;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+
+        a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--dark-navy);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-navy));
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary-green), #2E7D32);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent-orange), #E65100);
+        }
+
+        .btn-urgency-low {
+            background: var(--low-urgency);
+        }
+
+        .btn-urgency-medium {
+            background: var(--medium-urgency);
+        }
+
+        .btn-urgency-high {
+            background: var(--high-urgency);
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: var(--dark-navy);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-logo i {
+            margin-right: 0.5rem;
+            color: var(--secondary-green);
+        }
+
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .navbar-menu li {
+            margin-left: 1.5rem;
+        }
+
+        .navbar-menu a {
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-menu a:hover {
+            color: var(--secondary-green);
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-y : scroll;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-navy));
+        }
+
+        .hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 71, 161, 0.6);
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            color: white;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .hero-title {
+            margin-bottom: 1.5rem;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+        }
+
+        .hero-subtitle {
+            margin-bottom: 2rem;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Section */
+        .section {
+            padding: 4rem 0;
+        }
+
+        .section-light {
+            background-color: var(--light-gray);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--dark-navy);
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+
+        /* Report Form */
+        .report-form {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+        }
+
+        .urgency-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .urgency-option {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .photo-upload {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .photo-preview {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light-gray);
+            position: relative;
+             overflow-y: auto;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--high-urgency);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard-header {
+            background-color: var(--dark-navy);
+            color: white;
+            padding: 1rem 0;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+        }
+
+        .dashboard-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dashboard-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .dashboard-sidebar {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .dashboard-main {
+            flex: 3;
+            min-width: 300px;
+        }
+
+        .dashboard-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark-navy);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--medium-gray);
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .report-table th, .report-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .report-table th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+        }
+
+        .urgency-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .urgency-badge.high {
+            background-color: var(--high-urgency);
+        }
+
+        .urgency-badge.medium {
+            background-color: var(--medium-urgency);
+        }
+
+        .urgency-badge.low {
+            background-color: var(--low-urgency);
+        }
+
+        .urgency-badge.resolved {
+            background-color: var(--resolved);
+        }
+
+        .status-select {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow-y: scroll;
+
+        }
+
+        /* Login Form */
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--dark-navy);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 3rem;
+            color: var(--primary-blue);
+        }
+
+        /* Confirmation */
+        .confirmation {
+            text-align: center;
+            padding: 3rem 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .confirmation-icon {
+            font-size: 5rem;
+            color: var(--secondary-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .confirmation-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--dark-navy);
+        }
+
+        .confirmation-message {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .reference-number {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--dark-navy);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary-green);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--medium-gray);
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        .mt-4 { margin-top: 2rem; }
+        .mt-5 { margin-top: 2.5rem; }
+
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .mb-5 { margin-bottom: 2.5rem; }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1023px) {
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--dark-navy);
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .navbar-menu.active {
+                display: flex;
+            }
+
+            .navbar-menu li {
+                margin: 0.5rem 0;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .dashboard-content {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                order: 2;
+            }
+
+            .dashboard-main {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .urgency-options {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-table {
+                font-size: 0.9rem;
+            }
+
+            .report-table th, .report-table td {
+                padding: 0.5rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .animate-slideIn {
+            animation: slideInFromTop 0.5s ease-in-out;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background-color: var(--secondary-green);
+        }
+
+        .toast.error {
+            background-color: var(--high-urgency);
+        }
+
+        .toast.warning {
+            background-color: var(--medium-urgency);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <i class="fas fa-shield-alt"></i>
+                ChildSafe Zambia
+            </div>
+            <ul class="navbar-menu" id="navbarMenu">
+                <li><a href="#" onclick="showView('home')">Home</a></li>
+                <li><a href="#" onclick="showView('about')">About Us</a></li>
+                <li><a href="#" onclick="showView('learn')">Learn the Signs</a></li>
+                <li><a href="#" onclick="showView('help')">Get Help</a></li>
+                <li><a href="#" onclick="showView('report')">Report Incident</a></li>
+
+                <li><a href="MyChildSafe admin.html">Admin Login</a></li>
+
+                <!-- <li><a href="#" onclick="showView('login')">Admin Login</a></li>-->
+
+            </ul>
+            <button class="navbar-toggle" id="navbarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Home View -->
+    <div id="homeView" class="view">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content animate-slideIn">
+                <h1 class="hero-title">Protecting Zambia's Children Together</h1>
+                <p class="hero-subtitle">A secure, anonymous way to report child safety concerns in your community</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-accent animate-pulse" onclick="showView('report')">
+                        <i class="fas fa-exclamation-triangle"></i> Report Incident
+                    </button>
+                    <button class="btn btn-secondary" onclick="showView('learn')">
+                        <i class="fas fa-graduation-cap"></i> Learn the Signs
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="section section-light">
+            <div class="container">
+                <h2 class="section-title">How ChildSafe Works</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3>100% Anonymous</h3>
+                        <p>Your identity is completely protected. No personal information is collected when you make a report.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3>Location-Based</h3>
+                        <p>Reports are automatically tagged with your district location to ensure the right authorities respond.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Fast Response</h3>
+                        <p>High-urgency reports are immediately flagged for priority response by trained professionals.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <h3>Evidence Collection</h3>
+                        <p>Safely upload photos with automatic face-blurring to protect identities while preserving evidence.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Partner Organizations Section -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Our Partner Organizations</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-hands-helping"></i>
+                        </div>
+                        <h3>World Vision Zambia</h3>
+                        <p>Leading the implementation of ChildSafe with expertise in child protection programs.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <h3>Government Ministries</h3>
+                        <p>Working with Ministry of Youth, Sport and Arts and other government bodies for official response.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Local NGOs</h3>
+                        <p>Partnering with community-based organizations across Zambia for localized support.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- About View -->
+    <div id="aboutView" class="view hidden">
+        <section class="section">
+            <div class="container">
+                <h1 class="section-title">About ChildSafe Zambia</h1>
+                <div class="report-form">
+                    <p>ChildSafe Zambia is a collaborative initiative between World Vision and local authorities to create a safer environment for children across Zambia. Our mission is to provide a secure, anonymous platform for community members to report child safety concerns.</p>
+                    
+                    <h2 class="mt-4">Our Mission</h2>
+                    <p>To protect children from abuse, neglect, and early marriage through community-based reporting and rapid response intervention.</p>
+                    
+                    <h2 class="mt-4">Our Vision</h2>
+                    <p>A Zambia where every child is safe, protected, and has the opportunity to reach their full potential.</p>
+                    
+                    <h2 class="mt-4">Our Partners</h2>
+                    <p>ChildSafe Zambia is implemented through a partnership between:</p>
+                    <ul>
+                        <li>World Vision Zambia</li>
+                        <li>Ministry of Youth, Sport and Arts</li>
+                        <li>Ministry of Home Affairs</li>
+                        <li>Local Community-Based Organizations</li>
+                        <li>Traditional Leaders</li>
+                    </ul>
+                    
+                    <h2 class="mt-4">How It Works</h2>
+                    <p>When a report is submitted through ChildSafe, it is immediately routed to the appropriate authorities based on the location and urgency level. Trained professionals review each report and take appropriate action to ensure the safety of the child or children involved.</p>
+                    
+                    <h2 class="mt-4">Our Impact</h2>
+                    <p>Since our launch, ChildSafe has:</p>
+                    <ul>
+                        <li>Received and processed thousands of reports</li>
+                        <li>Provided intervention for hundreds of at-risk children</li>
+                        <li>Trained community members to identify and report child safety concerns</li>
+                        <li>Strengthened coordination between government and civil society organizations</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Learn View -->
+    <div id="learnView" class="view hidden">
+        <section class="section">
+            <div class="container">
+                <h1 class="section-title">Learn the Signs</h1>
+                <div class="report-form">
+                    <p>Recognizing the signs of abuse, neglect, and early marriage risks is crucial for protecting children in our communities. Below are some key indicators to watch for:</p>
+                    
+                    <h2 class="mt-4">Physical Abuse Signs</h2>
+                    <ul>
+                        <li>Unexplained bruises, burns, or injuries</li>
+                        <li>Frequent injuries that the child cannot explain</li>
+                        <li>Fear of going home or seeing certain adults</li>
+                        <li>Withdrawn behavior, anxiety, or depression</li>
+                        <li>Wearing inappropriate clothing to hide injuries (long sleeves in hot weather)</li>
+                    </ul>
+                    
+                    <h2 class="mt-4">Neglect Signs</h2>
+                    <ul>
+                        <li>Poor hygiene or consistently dirty clothing</li>
+                        <li>Untreated medical or dental issues</li>
+                        <li>Frequent hunger or hoarding food</li>
+                        <li>Inappropriate clothing for weather conditions</li>
+                        <li>Lack of supervision, especially for young children</li>
+                        <li>Developmental delays or poor academic performance</li>
+                    </ul>
+                    
+                    <h2 class="mt-4">Early Marriage Risk Signs</h2>
+                    <ul>
+                        <li>Sudden withdrawal from school</li>
+                        <li>Discussions about engagement or marriage for a child under 18</li>
+                        <li>Child showing signs of pregnancy</li>
+                        <li>Family financial pressures leading to consideration of marriage for economic reasons</li>
+                        <li>Cultural or traditional practices that promote early marriage</li>
+                    </ul>
+                    
+                    <h2 class="mt-4">What to Do If You Suspect a Problem</h2>
+                    <p>If you observe any of these signs or have concerns about a child's safety:</p>
+                    <ol>
+                        <li>Document what you've observed (dates, times, specific concerns)</li>
+                        <li>Report your concerns immediately through the ChildSafe platform</li>
+                        <li>Do not confront the suspected abuser directly</li>
+                        <li>Do not share your suspicions with others who might alert the abuser</li>
+                        <li>Follow up if you continue to see concerning signs</li>
+                    </ol>
+                    
+                    <h2 class="mt-4">Remember</h2>
+                    <p>Your report could save a child's life. It's always better to report a concern that turns out to be nothing than to stay silent when a child needs help.</p>
+                    
+                    <div class="text-center mt-4">
+                        <button class="btn btn-accent" onclick="showView('report')">
+                            <i class="fas fa-exclamation-triangle"></i> Report a Concern Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Help View -->
+    <div id="helpView" class="view hidden">
+        <section class="section">
+            <div class="container">
+                <h1 class="section-title">Get Help</h1>
+                <div class="report-form">
+                    <p>If you or someone you know needs immediate help with child safety concerns, these resources are available:</p>
+                    
+                    <h2 class="mt-4">Emergency Services</h2>
+                    <div class="feature-card">
+                        <h3>Police Emergency</h3>
+                        <p><i class="fas fa-phone"></i> 991 or 999</p>
+                        <p>For immediate threats to child safety</p>
+                    </div>
+                    
+                    <h2 class="mt-4">Child Protection Services</h2>
+                    <div class="feature-card">
+                        <h3>Department of Social Welfare</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 254 161</p>
+                        <p>Government child protection services</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Child Help Line</h3>
+                        <p><i class="fas fa-phone"></i> 116</p>
+                        <p>Toll-free helpline for children and those concerned about children</p>
+                    </div>
+                    
+                    <h2 class="mt-4">Counseling Services</h2>
+                    <div class="feature-card">
+                        <h3>World Vision Zambia</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 292 321</p>
+                        <p>Counseling and support for child abuse victims</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Young Women's Christian Association (YWCA)</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 253 815</p>
+                        <p>Support for girls and young women</p>
+                    </div>
+                    
+                    <h2 class="mt-4">Legal Aid</h2>
+                    <div class="feature-card">
+                        <h3>Legal Resources Foundation</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 254 619</p>
+                        <p>Free legal assistance for child protection cases</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Women and Law in Southern Africa (WLSA)</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 250 817</p>
+                        <p>Legal support for women and children</p>
+                    </div>
+                    
+                    <h2 class="mt-4">Shelters and Safe Houses</h2>
+                    <div class="feature-card">
+                        <h3>Kasisi Children's Home</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 286 033</p>
+                        <p>Emergency shelter for children in need</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Fountain of Hope</h3>
+                        <p><i class="fas fa-phone"></i> +260 211 254 942</p>
+                        <p>Support for street children and vulnerable youth</p>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button class="btn btn-accent" onclick="showView('report')">
+                            <i class="fas fa-exclamation-triangle"></i> Report an Incident
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Report View -->
+    <div id="reportView" class="view hidden">
+        <section class="section">
+            <div class="container">
+                <h1 class="section-title">Report an Incident</h1>
+                <form id="reportForm" class="report-form">
+                    <div class="form-group">
+                        <label class="form-label" for="incidentType">Type of Incident</label>
+                        <select class="form-control" id="incidentType" required>
+                            <option value="">Please select an incident type</option>
+                            <option value="physical">Physical Abuse</option>
+                            <option value="neglect">Neglect</option>
+                            <option value="marriage">Early Marriage Risk</option>
+                            <option value="other">Other Critical Issue</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="location">Location</label>
+                        <select class="form-control" id="location" required>
+                            <option value="">Please select your district</option>
+                            <option value="lusaka">Lusaka</option>
+                            <option value="copperbelt">Copperbelt</option>
+                            <option value="central">Central</option>
+                            <option value="eastern">Eastern</option>
+                            <option value="luapula">Luapula</option>
+                            <option value="northern">Northern</option>
+                            <option value="northwestern">Northwestern</option>
+                            <option value="southern">Southern</option>
+                            <option value="western">Western</option>
+                            <option value="muchinga">Muchinga</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="description">Incident Description</label>
+                        <textarea class="form-control" id="description" rows="4" maxlength="200" required placeholder="Please describe what you observed (be specific but brief)"></textarea>
+                        <small>Maximum 200 characters</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Urgency Level</label>
+                        <div class="urgency-options">
+                            <div class="urgency-option">
+                                <button type="button" class="btn btn-urgency-low" onclick="selectUrgency('low')">
+                                    <i class="fas fa-check-circle"></i> Low
+                                </button>
+                            </div>
+                            <div class="urgency-option">
+                                <button type="button" class="btn btn-urgency-medium" onclick="selectUrgency('medium')">
+                                    <i class="fas fa-exclamation-circle"></i> Medium
+                                </button>
+                            </div>
+                            <div class="urgency-option">
+                                <button type="button" class="btn btn-urgency-high" onclick="selectUrgency('high')">
+                                    <i class="fas fa-exclamation-triangle"></i> High
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="urgency" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Add Photos (Optional)</label>
+                        <p>Photos can help authorities respond more effectively. All faces will be automatically blurred to protect identities.</p>
+                        <div class="photo-upload" id="photoUpload">
+                            <div class="photo-preview" id="photoPreview1">
+                                <input type="file" id="photo1" accept="image/*" style="display: none;" onchange="previewPhoto(1)">
+                                <label for="photo1" style="cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+                                    <i class="fas fa-camera" style="font-size: 2rem; color: var(--medium-gray);"></i>
+                                    <span style="margin-top: 0.5rem; color: var(--medium-gray);">Add Photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-preview" id="photoPreview2">
+                                <input type="file" id="photo2" accept="image/*" style="display: none;" onchange="previewPhoto(2)">
+                                <label for="photo2" style="cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+                                    <i class="fas fa-camera" style="font-size: 2rem; color: var(--medium-gray);"></i>
+                                    <span style="margin-top: 0.5rem; color: var(--medium-gray);">Add Photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-preview" id="photoPreview3">
+                                <input type="file" id="photo3" accept="image/*" style="display: none;" onchange="previewPhoto(3)">
+                                <label for="photo3" style="cursor: pointer; display: flex-direction: column; align-items: center;">
+                                    <i class="fas fa-camera" style="font-size: 2rem; color: var(--medium-gray);"></i>
+                                    <span style="margin-top: 0.5rem; color: var(--medium-gray);">Add Photo</span>
+                                </label>
+                            </div>
+                            <div class="photo-preview" id="photoPreview4">
+                                <input type="file" id="photo4" accept="image/*" style="display: none;" onchange="previewPhoto(4)">
+                                <label for="photo4" style="cursor: pointer; display: flex-direction: column; align-items: center;">
+                                    <i class="fas fa-camera" style="font-size: 2rem; color: var(--medium-gray);"></i>
+                                    <span style="margin-top: 0.5rem; color: var(--medium-gray);">Add Photo</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group text-center">
+                        <button type="submit" class="btn" style="width: 100%; max-width: 400px;">
+                            <i class="fas fa-paper-plane"></i> Submit Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <!-- Confirmation View -->
+    <div id="confirmationView" class="view hidden">
+        <section class="section">
+            <div class="confirmation">
+                <div class="confirmation-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1 class="confirmation-title">Report Successfully Submitted</h1>
+                <p class="confirmation-message">Your report has been submitted securely. Your reference number is:</p>
+                <div class="reference-number" id="referenceNumber">CS-48392</div>
+                <p class="confirmation-message">Please save this number if you wish to follow up.</p>
+                <p class="confirmation-message">A trained professional from our partner organizations will review your report and take appropriate action.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-accent" onclick="showView('report')">
+                        <i class="fas fa-plus-circle"></i> Report Another Incident
+                    </button>
+                    <button class="btn btn-secondary" onclick="showView('home')">
+                        <i class="fas fa-home"></i> Return to Home
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Login View -->
+    <div id="loginView" class="view hidden">
+        <section class="section">
+            <div class="login-container">
+                <div class="login-logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2 class="login-title">Admin Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="role">Role</label>
+                        <select class="form-control" id="role" required>
+                            <option value="">Select your role</option>
+                            <option value="ngo">NGO</option>
+                            <option value="government">Government</option>
+                            <option value="administrator">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn" style="width: 100%;">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                </form>
+                <p class="text-center mt-3">
+                    <a href="#" onclick="showView('home')">Back to Home</a>
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboardView" class="view dashboard">
+        <header class="dashboard-header">
+            <div class="dashboard-container">
+                <h1 class="dashboard-title">ChildSafe Admin Dashboard</h1>
+                <div class="dashboard-user">
+                    <span id="userRole">Administrator</span>
+                    <div class="dashboard-user-avatar" id="userAvatar">A</div>
+                    <button class="btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container">
+            <div class="dashboard-content">
+                <aside class="dashboard-sidebar">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-title">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </div>
+                        <ul style="list-style: none;">
+                            <li style="padding: 0.5rem 0;"><a href="#" onclick="showDashboardSection('overview')">Overview</a></li>
+                            <li style="padding: 0.5rem 0;"><a href="#" onclick="showDashboardSection('reports')">Reports</a></li>
+                            <li style="padding: 0.5rem 0;"><a href="#" onclick="showDashboardSection('map')">Map View</a></li>
+                        </ul>
+                    </div>
+                </aside>
+                
+                <main class="dashboard-main">
+                    <!-- Overview Section -->
+                    <div id="overviewSection" class="dashboard-section">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">
+                                Report Overview
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="totalReports">24</div>
+                                    <div class="stat-label">Total Reports</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="highUrgencyReports" style="color: var(--high-urgency);">8</div>
+                                    <div class="stat-label">High Urgency</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="mediumUrgencyReports" style="color: var(--medium-urgency);">10</div>
+                                    <div class="stat-label">Medium Urgency</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="lowUrgencyReports" style="color: var(--low-urgency);">6</div>
+                                    <div class="stat-label">Low Urgency</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">
+                                Recent Reports
+                            </div>
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Report ID</th>
+                                        <th>Type</th>
+                                        <th>Location</th>
+                                        <th>Urgency</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentReportsTable">
+                                    <!-- Reports will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Reports Section -->
+                    <div id="reportsSection" class="dashboard-section hidden">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">
+                                All Reports
+                                <button class="btn" onclick="refreshReports()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Report ID</th>
+                                        <th>Type</th>
+                                        <th>Location</th>
+                                        <th>Urgency</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allReportsTable">
+                                    <!-- Reports will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Section -->
+                    <div id="mapSection" class="dashboard-section hidden">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">
+                                Report Map
+                            </div>
+                            <div id="map" class="map-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Report Detail Modal -->
+                    <div id="reportDetailModal" class="dashboard-card hidden">
+                        <div class="dashboard-card-title">
+                            Report Details
+                            <button class="btn" onclick="closeReportDetail()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                        <div id="reportDetailContent">
+                            <!-- Report details will be populated here -->
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ChildSafe Zambia</h3>
+                    <p>A secure platform for reporting child safety concerns across Zambia.</p>
+                    <div class="mt-2">
+                        <i class="fas fa-envelope"></i> info@childsafe.zm<br>
+                        <i class="fas fa-phone"></i> +260 211 254 161
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#" onclick="showView('home')">Home</a></li>
+                        <li><a href="#" onclick="showView('about')">About Us</a></li>
+                        <li><a href="#" onclick="showView('learn')">Learn the Signs</a></li>
+                        <li><a href="#" onclick="showView('help')">Get Help</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Child Protection Policy</a></li>
+                        <li><a href="#">Annual Reports</a></li>
+                        <li><a href="#">Training Materials</a></li>
+                        <li><a href="#">Research Publications</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="mt-2">
+                        <a href="#" style="margin-right: 1rem;"><i class="fab fa-facebook fa-2x"></i></a>
+                        <a href="#" style="margin-right: 1rem;"><i class="fab fa-twitter fa-2x"></i></a>
+                        <a href="#" style="margin-right: 1rem;"><i class="fab fa-instagram fa-2x"></i></a>
+                        <a href="#"><i class="fab fa-youtube fa-2x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 ChildSafe Zambia. All rights reserved. | Powered by World Vision Zambia</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Global variables
+        let currentView = 'home';
+        let selectedUrgency = '';
+        let uploadedPhotos = [];
+        let reports = [];
+        let map = null;
+        let mapMarkers = [];
+        let currentUser = null;
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize navigation toggle
+            document.getElementById('navbarToggle').addEventListener('click', function() {
+                document.getElementById('navbarMenu').classList.toggle('active');
+            });
+
+            // Initialize report form
+            document.getElementById('reportForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitReport();
+            });
+
+            // Initialize login form
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                login();
+            });
+
+            // Generate sample reports for demo
+            generateSampleReports();
+
+            // Set up auto-logout timer (20 minutes)
+            let logoutTimer;
+            function resetLogoutTimer() {
+                clearTimeout(logoutTimer);
+                logoutTimer = setTimeout(logout, 20 * 60 * 1000); // 20 minutes
+            }
+
+            document.addEventListener('click', resetLogoutTimer);
+            document.addEventListener('keypress', resetLogoutTimer);
+        });
+
+        // View navigation
+        function showView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.add('hidden');
+            });
+
+            // Show the selected view
+            document.getElementById(viewName + 'View').classList.remove('hidden');
+            currentView = viewName;
+
+            // Close mobile menu if open
+            document.getElementById('navbarMenu').classList.remove('active');
+
+            // Special handling for specific views
+            if (viewName === 'dashboard') {
+                initializeDashboard();
+            } else if (viewName === 'confirmation') {
+                generateReferenceNumber();
+            }
+        }
+
+        // Report form functions
+        function selectUrgency(level) {
+            selectedUrgency = level;
+            document.getElementById('urgency').value = level;
+
+            // Update button styles
+            document.querySelectorAll('.btn-urgency-low, .btn-urgency-medium, .btn-urgency-high').forEach(btn => {
+                btn.style.opacity = '0.7';
+            });
+
+            if (level === 'low') {
+                document.querySelector('.btn-urgency-low').style.opacity = '1';
+            } else if (level === 'medium') {
+                document.querySelector('.btn-urgency-medium').style.opacity = '1';
+            } else if (level === 'high') {
+                document.querySelector('.btn-urgency-high').style.opacity = '1';
+            }
+        }
+
+        function previewPhoto(photoNum) {
+            const input = document.getElementById(`photo${photoNum}`);
+            const preview = document.getElementById(`photoPreview${photoNum}`);
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    
+                    // Clear preview and add image
+                    preview.innerHTML = '';
+                    preview.appendChild(img);
+                    
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'photo-remove';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.onclick = function() {
+                        removePhoto(photoNum);
+                    };
+                    preview.appendChild(removeBtn);
+                    
+                    // Store photo data
+                    uploadedPhotos[photoNum] = e.target.result;
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removePhoto(photoNum) {
+            const preview = document.getElementById(`photoPreview${photoNum}`);
+            const input = document.getElementById(`photo${photoNum}`);
+            
+            // Reset input
+            input.value = '';
+            
+            // Reset preview
+            preview.innerHTML = `
+                <input type="file" id="photo${photoNum}" accept="image/*" style="display: none;" onchange="previewPhoto(${photoNum})">
+                <label for="photo${photoNum}" style="cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+                    <i class="fas fa-camera" style="font-size: 2rem; color: var(--medium-gray);"></i>
+                    <span style="margin-top: 0.5rem; color: var(--medium-gray);">Add Photo</span>
+                </label>
+            `;
+            
+            // Remove from stored photos
+            delete uploadedPhotos[photoNum];
+        }
+
+        function submitReport() {
+            // Validate form
+            const incidentType = document.getElementById('incidentType').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            const urgency = document.getElementById('urgency').value;
+
+            if (!incidentType || !location || !description || !urgency) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Generate report data
+            const reportId = 'CS-' + Math.floor(Math.random() * 90000) + 10000;
+            const timestamp = new Date().toISOString();
+            
+            // Create report object
+            const report = {
+                id: reportId,
+                type: incidentType,
+                location: location,
+                description: description,
+                urgency: urgency,
+                status: 'new',
+                timestamp: timestamp,
+                photos: Object.values(uploadedPhotos).filter(photo => photo)
+            };
+
+            // Add to reports array
+            reports.push(report);
+
+            // Show confirmation
+            document.getElementById('referenceNumber').textContent = reportId;
+            showView('confirmation');
+            
+            // Reset form
+            document.getElementById('reportForm').reset();
+            selectedUrgency = '';
+            uploadedPhotos = [];
+            
+            // Reset photo previews
+            for (let i = 1; i <= 4; i++) {
+                removePhoto(i);
+            }
+            
+            // Show success message
+            showToast('Report submitted successfully', 'success');
+        }
+
+        function generateReferenceNumber() {
+            const refNum = 'CS-' + Math.floor(Math.random() * 90000) + 10000;
+            document.getElementById('referenceNumber').textContent = refNum;
+        }
+
+        // Login functions
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            // Simple validation (in a real app, this would be server-side)
+            if (!username || !password || !role) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Store current user
+            currentUser = {
+                username: username,
+                role: role,
+                avatar: username.charAt(0).toUpperCase()
+            };
+
+            // Update dashboard header
+            document.getElementById('userRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+
+            // Show dashboard
+            showView('dashboard');
+            showToast('Login successful', 'success');
+        }
+
+        function logout() {
+            currentUser = null;
+            showView('home');
+            showToast('Logged out successfully', 'success');
+        }
+
+        // Dashboard functions
+        function initializeDashboard() {
+            updateDashboardStats();
+            updateRecentReportsTable();
+            updateAllReportsTable();
+            initializeMap();
+        }
+
+        function updateDashboardStats() {
+            const totalReports = reports.length;
+            const highUrgencyReports = reports.filter(r => r.urgency === 'high').length;
+            const mediumUrgencyReports = reports.filter(r => r.urgency === 'medium').length;
+            const lowUrgencyReports = reports.filter(r => r.urgency === 'low').length;
+
+            document.getElementById('totalReports').textContent = totalReports;
+            document.getElementById('highUrgencyReports').textContent = highUrgencyReports;
+            document.getElementById('mediumUrgencyReports').textContent = mediumUrgencyReports;
+            document.getElementById('lowUrgencyReports').textContent = lowUrgencyReports;
+        }
+
+        function updateRecentReportsTable() {
+            const tableBody = document.getElementById('recentReportsTable');
+            tableBody.innerHTML = '';
+
+            // Sort reports by timestamp (newest first)
+            const sortedReports = [...reports].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Get the 10 most recent reports
+            const recentReports = sortedReports.slice(0, 10);
+
+            recentReports.forEach(report => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${report.id}</td>
+                    <td>${formatIncidentType(report.type)}</td>
+                    <td>${formatLocation(report.location)}</td>
+                    <td><span class="urgency-badge ${report.urgency}">${formatUrgency(report.urgency)}</span></td>
+                    <td><span class="urgency-badge ${report.status}">${formatStatus(report.status)}</span></td>
+                    <td>${formatDate(report.timestamp)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateAllReportsTable() {
+            const tableBody = document.getElementById('allReportsTable');
+            tableBody.innerHTML = '';
+
+            // Sort reports by timestamp (newest first)
+            const sortedReports = [...reports].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            sortedReports.forEach(report => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${report.id}</td>
+                    <td>${formatIncidentType(report.type)}</td>
+                    <td>${formatLocation(report.location)}</td>
+                    <td><span class="urgency-badge ${report.urgency}">${formatUrgency(report.urgency)}</span></td>
+                    <td>
+                        <select class="status-select" onchange="updateReportStatus('${report.id}', this.value)">
+                            <option value="new" ${report.status === 'new' ? 'selected' : ''}>New</option>
+                            <option value="review" ${report.status === 'review' ? 'selected' : ''}>Under Review</option>
+                            <option value="resolved" ${report.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                        </select>
+                    </td>
+                    <td>${formatDate(report.timestamp)}</td>
+                    <td>
+                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="viewReportDetail('${report.id}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function initializeMap() {
+            // Only initialize map if it doesn't exist yet
+            if (map) return;
+
+            // Create map centered on Zambia
+            map = L.map('map').setView([-13.1339, 27.8493], 6);
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Add markers for reports
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            // Clear existing markers
+            mapMarkers.forEach(marker => map.removeLayer(marker));
+            mapMarkers = [];
+
+            // Add markers for each report
+            reports.forEach(report => {
+                // Get coordinates for the location (simplified for demo)
+                const coords = getLocationCoordinates(report.location);
+                
+                // Create marker with color based on urgency
+                const markerColor = report.urgency === 'high' ? 'red' : 
+                                    report.urgency === 'medium' ? 'orange' : 'green';
+                
+                const marker = L.circleMarker(coords, {
+                    radius: 8,
+                    fillColor: markerColor,
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                // Add popup with report details
+                marker.bindPopup(`
+                    <div>
+                        <strong>Report ID:</strong> ${report.id}<br>
+                        <strong>Type:</strong> ${formatIncidentType(report.type)}<br>
+                        <strong>Urgency:</strong> ${formatUrgency(report.urgency)}<br>
+                        <strong>Status:</strong> ${formatStatus(report.status)}<br>
+                        <strong>Date:</strong> ${formatDate(report.timestamp)}<br>
+                        <button class="btn" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="viewReportDetail('${report.id}')">
+                            View Details
+                        </button>
+                    </div>
+                `);
+                
+                mapMarkers.push(marker);
+            });
+        }
+
+        function getLocationCoordinates(location) {
+            // Simplified coordinates for Zambian provinces
+            const locations = {
+                'lusaka': [-15.3875, 28.3228],
+                'copperbelt': [-12.9667, 28.1333],
+                'central': [-14.4167, 28.2833],
+                'eastern': [-13.9667, 32.1167],
+                'luapula': [-10.4167, 29.1167],
+                'northern': [-9.4167, 30.7167],
+                'northwestern': [-12.4167, 25.1167],
+                'southern': [-17.0667, 26.4167],
+                'western': [-14.4667, 23.4167],
+                'muchinga': [-10.4167, 32.4167]
+            };
+            
+            return locations[location] || [-13.1339, 27.8493]; // Default to Zambia center
+        }
+
+        function viewReportDetail(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+
+            const detailContent = document.getElementById('reportDetailContent');
+            detailContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h3>Report Information</h3>
+                        <p><strong>Report ID:</strong> ${report.id}</p>
+                        <p><strong>Type:</strong> ${formatIncidentType(report.type)}</p>
+                        <p><strong>Location:</strong> ${formatLocation(report.location)}</p>
+                        <p><strong>Urgency:</strong> <span class="urgency-badge ${report.urgency}">${formatUrgency(report.urgency)}</span></p>
+                        <p><strong>Status:</strong> <span class="urgency-badge ${report.status}">${formatStatus(report.status)}</span></p>
+                        <p><strong>Date Submitted:</strong> ${formatDate(report.timestamp)}</p>
+                    </div>
+                    <div>
+                        <h3>Description</h3>
+                        <p>${report.description}</p>
+                    </div>
+                </div>
+                
+                ${report.photos.length > 0 ? `
+                    <h3 class="mt-3">Attached Photos</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        ${report.photos.map(photo => `
+                            <img src="${photo}" style="width: 150px; height: 150px; object-fit: cover; border-radius: 4px;">
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="mt-3">
+                    <h3>Status Management</h3>
+                    <div class="form-group">
+                        <label class="form-label">Update Status</label>
+                        <select class="form-control" id="detailStatusSelect" onchange="updateReportStatusFromDetail('${report.id}')">
+                            <option value="new" ${report.status === 'new' ? 'selected' : ''}>New</option>
+                            <option value="review" ${report.status === 'review' ? 'selected' : ''}>Under Review</option>
+                            <option value="resolved" ${report.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Internal Notes</label>
+                        <textarea class="form-control" id="internalNotes" rows="4" placeholder="Add notes about this report..."></textarea>
+                    </div>
+                    <button class="btn" onclick="saveReportNotes('${report.id}')">
+                        <i class="fas fa-save"></i> Save Notes
+                    </button>
+                </div>
+            `;
+
+            // Show the detail modal
+            document.getElementById('reportDetailModal').classList.remove('hidden');
+        }
+
+        function closeReportDetail() {
+            document.getElementById('reportDetailModal').classList.add('hidden');
+        }
+
+        function updateReportStatus(reportId, newStatus) {
+            const report = reports.find(r => r.id === reportId);
+            if (report) {
+                report.status = newStatus;
+                updateDashboardStats();
+                updateRecentReportsTable();
+                updateAllReportsTable();
+                updateMapMarkers();
+                showToast(`Report status updated to ${formatStatus(newStatus)}`, 'success');
+            }
+        }
+
+        function updateReportStatusFromDetail(reportId) {
+            const newStatus = document.getElementById('detailStatusSelect').value;
+            updateReportStatus(reportId, newStatus);
+        }
+
+        function saveReportNotes(reportId) {
+            const notes = document.getElementById('internalNotes').value;
+            // In a real app, this would save to a database
+            showToast('Notes saved successfully', 'success');
+        }
+
+        function refreshReports() {
+            updateDashboardStats();
+            updateRecentReportsTable();
+            updateAllReportsTable();
+            updateMapMarkers();
+            showToast('Reports refreshed', 'success');
+        }
+
+        function showDashboardSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+
+            // Show the selected section
+            document.getElementById(section + 'Section').classList.remove('hidden');
+
+            // Special handling for map section
+            if (section === 'map' && map) {
+                setTimeout(() => {
+                    map.invalidateSize();
+                    updateMapMarkers();
+                }, 100);
+            }
+        }
+
+        // Utility functions
+        function formatIncidentType(type) {
+            const types = {
+                'physical': 'Physical Abuse',
+                'neglect': 'Neglect',
+                'marriage': 'Early Marriage Risk',
+                'other': 'Other Critical Issue'
+            };
+            return types[type] || type;
+        }
+
+        function formatLocation(location) {
+            const locations = {
+                'lusaka': 'Lusaka',
+                'copperbelt': 'Copperbelt',
+                'central': 'Central',
+                'eastern': 'Eastern',
+                'luapula': 'Luapula',
+                'northern': 'Northern',
+                'northwestern': 'Northwestern',
+                'southern': 'Southern',
+                'western': 'Western',
+                'muchinga': 'Muchinga'
+            };
+            return locations[location] || location;
+        }
+
+        function formatUrgency(urgency) {
+            const urgencies = {
+                'high': 'High',
+                'medium': 'Medium',
+                'low': 'Low'
+            };
+            return urgencies[urgency] || urgency;
+        }
+
+        function formatStatus(status) {
+            const statuses = {
+                'new': 'New',
+                'review': 'Under Review',
+                'resolved': 'Resolved'
+            };
+            return statuses[status] || status;
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Generate sample reports for demo
+        function generateSampleReports() {
+            const sampleReports = [
+                {
+                    id: 'CS-12345',
+                    type: 'physical',
+                    location: 'lusaka',
+                    description: 'Child showing signs of physical abuse at school',
+                    urgency: 'high',
+                    status: 'new',
+                    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+                    photos: []
+                },
+                {
+                    id: 'CS-12346',
+                    type: 'neglect',
+                    location: 'copperbelt',
+                    description: 'Children left alone at home for extended periods',
+                    urgency: 'medium',
+                    status: 'review',
+                    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+                    photos: []
+                },
+                {
+                    id: 'CS-12347',
+                    type: 'marriage',
+                    location: 'eastern',
+                    description: '15-year-old girl being prepared for marriage',
+                    urgency: 'high',
+                    status: 'review',
+                    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
+                    photos: []
+                },
+                {
+                    id: 'CS-12348',
+                    type: 'other',
+                    location: 'central',
+                    description: 'Child labor in local market',
+                    urgency: 'medium',
+                    status: 'resolved',
+                    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+                    photos: []
+                },
+                {
+                    id: 'CS-12349',
+                    type: 'physical',
+                    location: 'southern',
+                    description: 'Teacher physically punishing students',
+                    urgency: 'high',
+                    status: 'new',
+                    timestamp: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(), // 1.25 days ago
+                    photos: []
+                },
+                {
+                    id: 'CS-12350',
+                    type: 'neglect',
+                    location: 'western',
+                    description: 'Malnourished child in community',
+                    urgency: 'low',
+                    status: 'review',
+                    timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(), // 2 days ago
+                    photos: []
+                }
+            ];
+
+            reports = sampleReports;
+        }
+    </script>
+</body>
+</html>
